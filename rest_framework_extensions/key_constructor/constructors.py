@@ -75,10 +75,10 @@ class KeyConstructor(object):
         )
 
     def prepare_key(self, key_dict):
-        return hashlib.sha256(json.dumps(key_dict, sort_keys=True).encode('utf-8')).hexdigest()
+        return hashlib.md5(json.dumps(key_dict, sort_keys=True).encode('utf-8')).hexdigest()
 
     def get_data_from_bits(self, **kwargs):
-        result_dict = {}    
+        result_dict = {}
         for bit_name, bit_instance in self.bits.items():
             if bit_name in self.params:
                 params = self.params[bit_name]
@@ -104,3 +104,19 @@ class DefaultObjectKeyConstructor(DefaultKeyConstructor):
 class DefaultListKeyConstructor(DefaultKeyConstructor):
     list_sql_query = bits.ListSqlQueryKeyBit()
     pagination = bits.PaginationKeyBit()
+
+
+class DefaultAPIModelInstanceKeyConstructor(KeyConstructor):
+    """
+    Use this constructor when the values of the model instance are required
+    to identify the resource.
+    """
+    retrieve_model_values = bits.RetrieveModelKeyBit()
+
+
+class DefaultAPIModelListKeyConstructor(KeyConstructor):
+    """
+    Use this constructor when the values of the model instance are required
+    to identify many resources.
+    """
+    list_model_values = bits.ListModelKeyBit()

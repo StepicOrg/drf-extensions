@@ -33,6 +33,7 @@ class PermissionsCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = PermissionsComment
 
+
 class CommentObjectPermissionsWithoutHidingForbiddenObjects(CommentObjectPermissions):
     hide_forbidden_for_read_objects = False
 

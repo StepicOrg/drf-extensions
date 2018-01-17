@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from rest_framework_extensions.compat import force_text
+from django.utils.encoding import force_text
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -23,7 +23,7 @@ class BulkOperationBaseMixin(object):
                 )
             }
         else:
-            return True,  {}
+            return True, {}
 
 
 class ListDestroyModelMixin(BulkOperationBaseMixin):

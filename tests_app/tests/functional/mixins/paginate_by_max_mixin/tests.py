@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import datetime
+import unittest
 
 from django.test import TestCase
-from django.utils import unittest
+from django.test import override_settings
 
 from rest_framework_extensions.utils import get_rest_framework_features
 
-from .urls import urlpatterns
 from .models import CommentForPaginateByMaxMixin
 
 
@@ -14,8 +14,8 @@ from .models import CommentForPaginateByMaxMixin
     not get_rest_framework_features()['max_paginate_by'],
     "Current DRF version doesn't support max_paginate_by parameter"
 )
+@override_settings(ROOT_URLCONF='tests_app.tests.functional.mixins.paginate_by_max_mixin.urls')
 class PaginateByMaxMixinTest(TestCase):
-    urls = urlpatterns
 
     def setUp(self):
         for i in range(30):
@@ -54,8 +54,8 @@ class PaginateByMaxMixinTest(TestCase):
     get_rest_framework_features()['max_paginate_by'],
     "Current DRF version supports max_paginate_by parameter"
 )
+@override_settings(ROOT_URLCONF='tests_app.tests.functional.mixins.paginate_by_max_mixin.urls')
 class PaginateByMaxMixinTestBehavior__should_not_affect_view_if_DRF_does_not_supports__max_paginate_by(TestCase):
-    urls = urlpatterns
 
     def setUp(self):
         for i in range(30):

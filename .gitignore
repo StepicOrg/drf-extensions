@@ -1,3 +1,4 @@
+__pycache__/
 *.pyc
 *.egg-info
 .tox
@@ -5,3 +6,4 @@
 .idea
 env
 dist
+.DS_Store

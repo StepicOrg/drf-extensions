@@ -2,9 +2,9 @@
 from rest_framework.viewsets import ModelViewSet
 
 from .models import (
-    UnitNestedRouterMixinUserModel as UserModel,
-    UnitNestedRouterMixinGroupModel as GroupModel,
-    UnitNestedRouterMixinPermissionModel as PermissionModel,
+    NestedRouterMixinUserModel as UserModel,
+    NestedRouterMixinGroupModel as GroupModel,
+    NestedRouterMixinPermissionModel as PermissionModel,
 )
 
 
@@ -19,3 +19,17 @@ class GroupViewSet(ModelViewSet):
 class PermissionViewSet(ModelViewSet):
     model = PermissionModel
 
+
+class CustomRegexUserViewSet(ModelViewSet):
+    lookup_value_regex = 'a'
+    model = UserModel
+
+
+class CustomRegexGroupViewSet(ModelViewSet):
+    lookup_value_regex = 'b'
+    model = GroupModel
+
+
+class CustomRegexPermissionViewSet(ModelViewSet):
+    lookup_value_regex = 'c'
+    model = PermissionModel

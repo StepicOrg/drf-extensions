@@ -3,7 +3,9 @@ from django.utils.translation import get_language
 from django.db.models.query import EmptyQuerySet
 from django.db.models.sql.datastructures import EmptyResultSet
 
-from rest_framework_extensions.compat import force_text
+from django.utils.encoding import force_text
+
+from rest_framework_extensions import compat
 
 
 class AllArgsMixin(object):
@@ -171,10 +173,14 @@ class PaginationKeyBit(QueryParamsKeyBit):
     """
     def get_data(self, **kwargs):
         kwargs['params'] = []
-        if hasattr(kwargs['view_instance'], 'page_kwarg'):
-            kwargs['params'].append(kwargs['view_instance'].page_kwarg)
-        if hasattr(kwargs['view_instance'], 'paginate_by_param'):
-            kwargs['params'].append(kwargs['view_instance'].paginate_by_param)
+        if hasattr(kwargs['view_instance'], 'paginator'):
+            if hasattr(kwargs['view_instance'].paginator, 'page_query_param'):
+                kwargs['params'].append(
+                    kwargs['view_instance'].paginator.page_query_param)
+            if hasattr(kwargs['view_instance'].paginator,
+                       'page_size_query_param'):
+                kwargs['params'].append(
+                    kwargs['view_instance'].paginator.page_size_query_param)
         return super(PaginationKeyBit, self).get_data(**kwargs)
 
 
@@ -185,6 +191,22 @@ class SqlQueryKeyBitBase(KeyBitBase):
         else:
             try:
                 return force_text(queryset.query.__str__())
+            except EmptyResultSet:
+                return None
+
+
+class ModelInstanceKeyBitBase(KeyBitBase):
+    """
+    Return the actual contents of the query set.
+    This class is similar to the `SqlQueryKeyBitBase`.
+    """
+    def _get_queryset_query_values(self, queryset):
+        if isinstance(queryset, EmptyQuerySet) or queryset.count() == 0:
+            return None
+        else:
+            try:
+                # run through the instances and collect all values in ordered fashion
+                return compat.queryset_to_value_list(force_text(queryset.values_list()))
             except EmptyResultSet:
                 return None
 
@@ -206,6 +228,35 @@ class RetrieveSqlQueryKeyBit(SqlQueryKeyBitBase):
             return None
         else:
             return self._get_queryset_query_string(queryset)
+
+
+class RetrieveModelKeyBit(ModelInstanceKeyBitBase):
+    """
+    A key bit reflecting the contents of the model instance.
+    Return example:
+        u"[(3, False)]"
+    """
+    def get_data(self, params, view_instance, view_method, request, args, kwargs):
+        lookup_value = view_instance.kwargs[view_instance.lookup_field]
+        try:
+            queryset = view_instance.filter_queryset(view_instance.get_queryset()).filter(
+                **{view_instance.lookup_field: lookup_value}
+            )
+        except ValueError:
+            return None
+        else:
+            return self._get_queryset_query_values(queryset)
+
+
+class ListModelKeyBit(ModelInstanceKeyBitBase):
+    """
+    A key bit reflecting the contents of a list of model instances.
+    Return example:
+        u"[(1, True), (2, True), (3, False)]"
+    """
+    def get_data(self, params, view_instance, view_method, request, args, kwargs):
+        queryset = view_instance.filter_queryset(view_instance.get_queryset())
+        return self._get_queryset_query_values(queryset)
 
 
 class ArgsKeyBit(AllArgsMixin, KeyBitBase):
