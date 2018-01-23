@@ -2,6 +2,7 @@
 import hashlib
 import json
 
+from rest_framework_extensions.exceptions import SkipAPICache
 from rest_framework_extensions.key_constructor import bits
 from rest_framework_extensions.settings import extensions_api_settings
 
@@ -60,7 +61,7 @@ class KeyConstructor(object):
             'args': args,
             'kwargs': kwargs,
             'instance_id': id(self)
-        })
+        }, sort_keys=True)
 
     def _get_key(self, view_instance, view_method, request, args, kwargs):
         _kwargs = {
@@ -70,9 +71,12 @@ class KeyConstructor(object):
             'args': args,
             'kwargs': kwargs,
         }
-        return self.prepare_key(
-            self.get_data_from_bits(**_kwargs)
-        )
+        try:
+            return self.prepare_key(
+                self.get_data_from_bits(**_kwargs)
+            )
+        except SkipAPICache:
+            return None
 
     def prepare_key(self, key_dict):
         return hashlib.md5(json.dumps(key_dict, sort_keys=True).encode('utf-8')).hexdigest()

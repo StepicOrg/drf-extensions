@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 from functools import wraps
 
-from django.utils.decorators import available_attrs
-
-
-from rest_framework_extensions.settings import extensions_api_settings
 from django.utils import six
+from django.utils.decorators import available_attrs
+from rest_framework_extensions.settings import extensions_api_settings
 
 
 def get_cache(alias):
@@ -38,6 +36,7 @@ class CacheResponse(object):
 
     def __call__(self, func):
         this = self
+
         @wraps(func, assigned=available_attrs(func))
         def inner(self, request, *args, **kwargs):
             return this.process_cache_response(
@@ -47,6 +46,7 @@ class CacheResponse(object):
                 args=args,
                 kwargs=kwargs,
             )
+
         return inner
 
     def process_cache_response(self,
@@ -62,17 +62,20 @@ class CacheResponse(object):
             args=args,
             kwargs=kwargs
         )
-        response = self.cache.get(key)
-        if not response:
+        if key is not None:
+            response = self.cache.get(key)
+            if not response:
+                response = view_method(view_instance, request, *args, **kwargs)
+                response = view_instance.finalize_response(request, response, *args, **kwargs)
+                response.render()  # should be rendered, before picklining while storing to cache
+
+                if not response.status_code >= 400 or self.cache_errors:
+                    self.cache.set(key, response, self.timeout)
+
+            if not hasattr(response, '_closable_objects'):
+                response._closable_objects = []
+        else:
             response = view_method(view_instance, request, *args, **kwargs)
-            response = view_instance.finalize_response(request, response, *args, **kwargs)
-            response.render()  # should be rendered, before picklining while storing to cache
-
-            if not response.status_code >= 400 or self.cache_errors:
-                self.cache.set(key, response, self.timeout)
-
-        if not hasattr(response, '_closable_objects'):
-            response._closable_objects = []
 
         return response
 

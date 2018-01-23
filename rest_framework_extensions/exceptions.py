@@ -7,3 +7,7 @@ class PreconditionRequiredException(APIException):
     status_code = status.HTTP_428_PRECONDITION_REQUIRED
     default_detail = _('This "{method}" request is required to be conditional.')
     default_code = 'precondition_required'
+
+
+class SkipAPICache(Exception):
+    pass
