@@ -2,17 +2,16 @@
 import logging
 from functools import wraps
 
+from django.utils import six
 from django.utils.decorators import available_attrs
 from django.utils.http import parse_etags, quote_etag
-
 from rest_framework import status
 from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework_extensions.exceptions import PreconditionRequiredException
-
-from rest_framework_extensions.utils import prepare_header_name
 from rest_framework_extensions.settings import extensions_api_settings
-from django.utils import six
+from rest_framework_extensions.signals import api_response_cached
+from rest_framework_extensions.utils import prepare_header_name
 
 logger = logging.getLogger('django.request')
 
@@ -55,10 +54,19 @@ class ETAGProcessor(object):
             args=args,
             kwargs=kwargs,
         )
-
+        signal_kwargs = dict(
+            view_instance=view_instance,
+            view_method=view_method,
+            request=request,
+            args=args,
+            kwargs=kwargs,
+            status='hit',
+            not_modified=True,
+        )
         if self.is_if_none_match_failed(res_etag, etags, if_none_match):
             if request.method in SAFE_METHODS:
                 response = Response(status=status.HTTP_304_NOT_MODIFIED)
+                api_response_cached.send(sender=self.__class__, **signal_kwargs)
             else:
                 response = self._get_and_log_precondition_failed_response(request=request)
         elif self.is_if_match_failed(res_etag, etags, if_match):

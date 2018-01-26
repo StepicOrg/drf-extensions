@@ -4,6 +4,7 @@ from functools import wraps
 from django.utils import six
 from django.utils.decorators import available_attrs
 from rest_framework_extensions.settings import extensions_api_settings
+from rest_framework_extensions.signals import api_response_cached
 
 
 def get_cache(alias):
@@ -62,6 +63,14 @@ class CacheResponse(object):
             args=args,
             kwargs=kwargs
         )
+        signal_kwargs = dict(
+            view_instance=view_instance,
+            view_method=view_method,
+            request=request,
+            args=args,
+            kwargs=kwargs,
+            not_modified=False,
+        )
         if key is not None:
             response = self.cache.get(key)
             if not response:
@@ -72,10 +81,15 @@ class CacheResponse(object):
                 if not response.status_code >= 400 or self.cache_errors:
                     self.cache.set(key, response, self.timeout)
 
+                api_response_cached.send(sender=self.__class__, status='miss', **signal_kwargs)
+            else:
+                api_response_cached.send(sender=self.__class__, status='hit', **signal_kwargs)
+
             if not hasattr(response, '_closable_objects'):
                 response._closable_objects = []
         else:
             response = view_method(view_instance, request, *args, **kwargs)
+            api_response_cached.send(sender=self.__class__, status='skip', **signal_kwargs)
 
         return response
 
