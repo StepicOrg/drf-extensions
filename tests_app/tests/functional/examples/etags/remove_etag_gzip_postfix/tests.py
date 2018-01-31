@@ -14,7 +14,7 @@ class RemoveEtagGzipPostfixTest(TestCase):
             'HTTP_ACCEPT_ENCODING': 'gzip'
         })
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response['ETag'], '"etag_value;gzip"')
+        self.assertEqual(response['ETag'], 'W/"etag_value"')
 
     @override_settings(MIDDLEWARE_CLASSES=(
         'tests_app.tests.functional.examples.etags.remove_etag_gzip_postfix.middleware.RemoveEtagGzipPostfix',
@@ -26,4 +26,4 @@ class RemoveEtagGzipPostfixTest(TestCase):
             'HTTP_ACCEPT_ENCODING': 'gzip'
         })
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response['ETag'], '"etag_value"')
+        self.assertEqual(response['ETag'], 'W/"etag_value"')

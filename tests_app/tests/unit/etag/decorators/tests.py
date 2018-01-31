@@ -227,10 +227,14 @@ class ETAGProcessorTestBehavior_if_none_match(ETAGProcessorTestBehaviorMixin, Te
         self.experiments = [
             {
                 'header_value': '123',
-                'should_fail': True
+                'should_fail': False
             },
             {
                 'header_value': '"123"',
+                'should_fail': True
+            },
+            {
+                'header_value': 'W/"123"',
                 'should_fail': True
             },
             {
@@ -246,11 +250,11 @@ class ETAGProcessorTestBehavior_if_none_match(ETAGProcessorTestBehaviorMixin, Te
                 'should_fail': False
             },
             {
-                'header_value': '"321" "123"',
+                'header_value': '"321", "123"',
                 'should_fail': True
             },
             {
-                'header_value': '321 "123"',
+                'header_value': '321, "123"',
                 'should_fail': True
             },
             {
@@ -262,7 +266,7 @@ class ETAGProcessorTestBehavior_if_none_match(ETAGProcessorTestBehaviorMixin, Te
                 'should_fail': True
             },
             {
-                'header_value': '321 "*"',
+                'header_value': '321, "*"',
                 'should_fail': True
             },
         ]
@@ -281,10 +285,14 @@ class ETAGProcessorTestBehavior_if_match(ETAGProcessorTestBehaviorMixin, TestCas
         self.experiments = [
             {
                 'header_value': '123',
-                'should_fail': False
+                'should_fail': True
             },
             {
                 'header_value': '"123"',
+                'should_fail': False
+            },
+            {
+                'header_value': 'W/"123"',
                 'should_fail': False
             },
             {
@@ -300,11 +308,11 @@ class ETAGProcessorTestBehavior_if_match(ETAGProcessorTestBehaviorMixin, TestCas
                 'should_fail': True
             },
             {
-                'header_value': '"321" "123"',
+                'header_value': '"321", "123"',
                 'should_fail': False
             },
             {
-                'header_value': '321 "123"',
+                'header_value': '321, "123"',
                 'should_fail': False
             },
             {
@@ -316,7 +324,7 @@ class ETAGProcessorTestBehavior_if_match(ETAGProcessorTestBehaviorMixin, TestCas
                 'should_fail': False
             },
             {
-                'header_value': '321 "*"',
+                'header_value': '321, "*"',
                 'should_fail': False
             },
         ]
@@ -618,10 +626,14 @@ class APIETAGProcessorTestBehavior_if_match(APIETAGProcessorTestBehaviorMixin, T
         self.experiments = [
             {
                 'header_value': '123',
-                'should_fail': False
+                'should_fail': True
             },
             {
                 'header_value': '"123"',
+                'should_fail': False
+            },
+            {
+                'header_value': 'W/"123"',
                 'should_fail': False
             },
             {
@@ -637,11 +649,11 @@ class APIETAGProcessorTestBehavior_if_match(APIETAGProcessorTestBehaviorMixin, T
                 'should_fail': True
             },
             {
-                'header_value': '"321" "123"',
+                'header_value': '"321", "123"',
                 'should_fail': False
             },
             {
-                'header_value': '321 "123"',
+                'header_value': '321, "123"',
                 'should_fail': False
             },
             {
@@ -653,7 +665,7 @@ class APIETAGProcessorTestBehavior_if_match(APIETAGProcessorTestBehaviorMixin, T
                 'should_fail': False
             },
             {
-                'header_value': '321 "*"',
+                'header_value': '321, "*"',
                 'should_fail': False
             },
         ]
@@ -672,10 +684,14 @@ class APIETAGProcessorTestBehavior_if_none_match(APIETAGProcessorTestBehaviorMix
         self.experiments = [
             {
                 'header_value': '123',
-                'should_fail': True
+                'should_fail': False
             },
             {
                 'header_value': '"123"',
+                'should_fail': True
+            },
+            {
+                'header_value': 'W/"123"',
                 'should_fail': True
             },
             {
@@ -691,11 +707,11 @@ class APIETAGProcessorTestBehavior_if_none_match(APIETAGProcessorTestBehaviorMix
                 'should_fail': False
             },
             {
-                'header_value': '"321" "123"',
+                'header_value': '"321", "123"',
                 'should_fail': True
             },
             {
-                'header_value': '321 "123"',
+                'header_value': '321, "123"',
                 'should_fail': True
             },
             {
@@ -707,7 +723,7 @@ class APIETAGProcessorTestBehavior_if_none_match(APIETAGProcessorTestBehaviorMix
                 'should_fail': True
             },
             {
-                'header_value': '321 "*"',
+                'header_value': '321, "*"',
                 'should_fail': True
             },
         ]

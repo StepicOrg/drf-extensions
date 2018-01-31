@@ -8,6 +8,7 @@ from django.utils.http import parse_etags, quote_etag
 from rest_framework import status
 from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
+
 from rest_framework_extensions.exceptions import PreconditionRequiredException
 from rest_framework_extensions.settings import extensions_api_settings
 from rest_framework_extensions.signals import api_response_cached
@@ -103,6 +104,12 @@ class ETAGProcessor(object):
                 # little extreme) -- this is Django bug #10681.
                 if_none_match = None
                 if_match = None
+            else:
+                # Remove weak ETag indicator and unquote ETags.
+                etags = [
+                    (etag[2:] if etag.startswith('W/') else etag).strip('"')
+                    for etag in etags
+                ]
         return etags, if_none_match, if_match
 
     def calculate_etag(self,
@@ -125,7 +132,6 @@ class ETAGProcessor(object):
 
     def is_if_none_match_failed(self, res_etag, etags, if_none_match):
         if res_etag and if_none_match:
-            etags = [etag.strip('"') for etag in etags]
             return res_etag in etags or '*' in etags
         else:
             return False
